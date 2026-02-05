@@ -19,8 +19,4 @@ public class Login {
     private UUID id;
     private String userName;
     private String password;
-
-//    @OneToOne
-//    @JoinColumn(name = "usuario_id")
-//    private Usuario usuario;
 }

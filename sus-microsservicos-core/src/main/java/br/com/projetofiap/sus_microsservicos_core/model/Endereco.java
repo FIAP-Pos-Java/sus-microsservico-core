@@ -23,8 +23,4 @@ public class Endereco {
     private String cidade;
     private String estado;
     private String cep;
-
-//    @ManyToOne
-//    @JoinColumn(name = "usuario_id")
-//    private Usuario usuario;
 }
