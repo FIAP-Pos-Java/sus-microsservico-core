@@ -11,6 +11,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 public class MedicoService {
@@ -25,11 +28,35 @@ public class MedicoService {
         return medicosDTO;
     }
 
+    public List<BuscarMedicoDTO> buscarMedicoPorId(String id){
+        UUID uuid = UUID.fromString(id);
+        Medico buscandoMedico = this.medicoRepository.findById(uuid).orElseThrow(() -> new IllegalArgumentException("usuario não existe"));
+        return List.of(this.medicoMapper.toDTO(buscandoMedico));
+    }
+
     public void cadastrarMedico(MedicoDTO dto){
         // todo implementar erro se tiver mesmo crm nao pode cadastrar
         Medico novoMedico = new Medico();
         novoMedico = this.medicoMapper.toEntity(dto);
         this.medicoRepository.save(novoMedico);
+    }
+
+    public void atualizarMedico(String id, MedicoDTO dto){
+        UUID uuid = UUID.fromString(id);
+        Medico buscandoMedico = this.medicoRepository.findById(uuid).orElseThrow(() -> new IllegalArgumentException("usuario não existe"));
+
+        System.out.println(uuid);
+        System.out.println(buscandoMedico.getId());
+
+        Medico atualizandoMedico = this.medicoMapper.toEntity(dto);
+        atualizandoMedico.setId(buscandoMedico.getId());
+        this.medicoRepository.save(atualizandoMedico);
+    }
+
+    public void removerMedico(String id){
+        UUID uuid = UUID.fromString(id);
+        Medico buscandoMedico = this.medicoRepository.findById(uuid).orElseThrow(() -> new IllegalArgumentException("usuario não existe"));
+        this.medicoRepository.deleteById(uuid);
     }
 
 }

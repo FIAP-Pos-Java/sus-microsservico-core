@@ -11,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("api/v1/medicos")
 @RequiredArgsConstructor
@@ -29,6 +31,15 @@ public class MedicoController {
         return new ResponseEntity(medicosDTO.getContent(), HttpStatus.OK);
     }
 
+    @GetMapping("{id}")
+    public ResponseEntity<BuscarMedicoDTO> buscarMedicoPorId(
+            @PathVariable String id
+    ) {
+        this.logger.info("GET -> /api/v1/medicos?id={}", id);
+        List<BuscarMedicoDTO> buscandoMedico = this.medicoService.buscarMedicoPorId(id);
+        return new ResponseEntity(buscandoMedico, HttpStatus.OK);
+    }
+
     @PostMapping
     public ResponseEntity<Void> cadastrarMedico(
             @RequestBody MedicoDTO dto
@@ -36,5 +47,24 @@ public class MedicoController {
         this.logger.info("POST -> /api/v1/medicos");
         this.medicoService.cadastrarMedico(dto);
         return new ResponseEntity(HttpStatus.CREATED);
+    }
+
+    @PutMapping("{id}")
+    public ResponseEntity<Void> atualizarMedico(
+            @PathVariable("id") String id,
+            @RequestBody MedicoDTO dto
+    ){
+        this.logger.info("PUT -> /api/v1/medicos");
+        this.medicoService.atualizarMedico(id, dto);
+        return new ResponseEntity(HttpStatus.NO_CONTENT);
+    }
+
+    @DeleteMapping("{id}")
+    public ResponseEntity<Void> removerMedico(
+            @PathVariable("id") String id
+    ){
+        this.logger.info("DELETE -> /api/v1/medicos/{id}", id);
+        this.medicoService.removerMedico(id);
+        return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 }
