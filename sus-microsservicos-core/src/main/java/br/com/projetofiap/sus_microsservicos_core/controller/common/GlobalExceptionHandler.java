@@ -1,11 +1,14 @@
 package br.com.projetofiap.sus_microsservicos_core.controller.common;
 
+import br.com.projetofiap.sus_microsservicos_core.controller.dto.ErroCampoDTO;
 import br.com.projetofiap.sus_microsservicos_core.controller.dto.ErroRespostaDTO;
 import br.com.projetofiap.sus_microsservicos_core.exceptions.UsuarioCadastradoException;
 import br.com.projetofiap.sus_microsservicos_core.exceptions.UsuarioInexistenteException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
 import org.springframework.web.ErrorResponse;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -42,5 +45,21 @@ public class GlobalExceptionHandler {
                 List.of()
         );
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(erro);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErroRespostaDTO> handlerMethodArgumentNotValid(MethodArgumentNotValidException ex) {
+        List<FieldError> fieldErrors = ex.getFieldErrors();
+        List<ErroCampoDTO> listaErrosCampos = fieldErrors.stream().map(error -> new ErroCampoDTO(
+                error.getField(),
+                error.getDefaultMessage()
+        )).toList();
+
+        ErroRespostaDTO erro = new ErroRespostaDTO(
+                HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                "erro de validação",
+                listaErrosCampos
+        );
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(erro);
     }
 }
