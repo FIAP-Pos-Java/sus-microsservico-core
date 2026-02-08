@@ -2,8 +2,11 @@ package br.com.projetofiap.sus_microsservicos_core.service;
 
 import br.com.projetofiap.sus_microsservicos_core.config.RabbitMQConfig;
 import br.com.projetofiap.sus_microsservicos_core.controller.dto.CirurgiaDTO;
-import br.com.projetofiap.sus_microsservicos_core.event.CirurgiaAgendadaEvent;
+import br.com.projetofiap.sus_microsservicos_core.event.CirurgiaAtualizadaEvent;
+import br.com.projetofiap.sus_microsservicos_core.event.CirurgiaCanceladaEvent;
+import br.com.projetofiap.sus_microsservicos_core.event.CirurgiaCriadaEvent;
 import br.com.projetofiap.sus_microsservicos_core.exceptions.UsuarioInexistenteException;
+import br.com.projetofiap.sus_microsservicos_core.model.enums.StatusCirurgia;
 import br.com.projetofiap.sus_microsservicos_core.repository.MedicoRepository;
 import br.com.projetofiap.sus_microsservicos_core.repository.PacienteRepository;
 import lombok.RequiredArgsConstructor;
@@ -26,41 +29,58 @@ public class CirurgiaOrquestradorService {
     public void agendarCirurgia(CirurgiaDTO dto) {
         validarUsuarios(dto.pacienteId(), dto.medicoId());
         
-        CirurgiaAgendadaEvent evento = CirurgiaAgendadaEvent.criar(
+        CirurgiaCriadaEvent evento = new CirurgiaCriadaEvent(
                 dto.pacienteId(),
                 dto.medicoId(),
                 dto.dataCirurgia(),
                 dto.horaCirurgia(),
                 dto.local(),
-                dto.descricao()
+                dto.descricao(),
+                StatusCirurgia.AGENDADA
         );
         
-        publicarEvento(evento);
-        logger.info("Comando CREATE publicado para paciente {} com médico {}", dto.pacienteId(), dto.medicoId());
+        rabbitTemplate.convertAndSend(
+                RabbitMQConfig.EXCHANGE,
+                RabbitMQConfig.CIRURGIA_CRIADA_ROUTING_KEY,
+                evento
+        );
+        
+        logger.info("Evento de criação publicado para paciente {} com médico {}", dto.pacienteId(), dto.medicoId());
     }
 
     public void atualizarCirurgia(UUID cirurgiaId, CirurgiaDTO dto) {
         validarUsuarios(dto.pacienteId(), dto.medicoId());
         
-        CirurgiaAgendadaEvent evento = CirurgiaAgendadaEvent.atualizar(
+        CirurgiaAtualizadaEvent evento = new CirurgiaAtualizadaEvent(
                 cirurgiaId,
                 dto.pacienteId(),
                 dto.medicoId(),
                 dto.dataCirurgia(),
                 dto.horaCirurgia(),
                 dto.local(),
-                dto.descricao()
+                dto.descricao(),
+                StatusCirurgia.AGENDADA
         );
         
-        publicarEvento(evento);
-        logger.info("Comando UPDATE publicado para cirurgia {}", cirurgiaId);
+        rabbitTemplate.convertAndSend(
+                RabbitMQConfig.EXCHANGE,
+                RabbitMQConfig.CIRURGIA_ATUALIZADA_ROUTING_KEY,
+                evento
+        );
+        
+        logger.info("Evento de atualização publicado para cirurgia {}", cirurgiaId);
     }
 
     public void cancelarCirurgia(UUID cirurgiaId) {
-        CirurgiaAgendadaEvent evento = CirurgiaAgendadaEvent.cancelar(cirurgiaId);
+        CirurgiaCanceladaEvent evento = new CirurgiaCanceladaEvent(cirurgiaId);
         
-        publicarEvento(evento);
-        logger.info("Comando DELETE publicado para cirurgia {}", cirurgiaId);
+        rabbitTemplate.convertAndSend(
+                RabbitMQConfig.EXCHANGE,
+                RabbitMQConfig.CIRURGIA_CANCELADA_ROUTING_KEY,
+                evento
+        );
+        
+        logger.info("Evento de cancelamento publicado para cirurgia {}", cirurgiaId);
     }
 
     private void validarUsuarios(UUID pacienteId, UUID medicoId) {
@@ -68,13 +88,5 @@ public class CirurgiaOrquestradorService {
                 .orElseThrow(() -> new UsuarioInexistenteException("Paciente não encontrado"));
         medicoRepository.findById(medicoId)
                 .orElseThrow(() -> new UsuarioInexistenteException("Médico não encontrado"));
-    }
-    
-    private void publicarEvento(CirurgiaAgendadaEvent evento) {
-        rabbitTemplate.convertAndSend(
-                RabbitMQConfig.EXCHANGE,
-                RabbitMQConfig.CIRURGIA_AGENDADA_ROUTING_KEY,
-                evento
-        );
     }
 }

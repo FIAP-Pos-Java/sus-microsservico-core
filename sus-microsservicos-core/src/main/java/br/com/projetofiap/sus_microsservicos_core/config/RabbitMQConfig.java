@@ -13,8 +13,14 @@ import org.springframework.context.annotation.Configuration;
 public class RabbitMQConfig {
     
     public static final String EXCHANGE = "sus.exchange";
-    public static final String CIRURGIA_AGENDADA_QUEUE = "cirurgia.agendada.queue";
-    public static final String CIRURGIA_AGENDADA_ROUTING_KEY = "cirurgia.agendada";
+    
+    public static final String CIRURGIA_CRIADA_QUEUE = "cirurgia.criada.queue";
+    public static final String CIRURGIA_ATUALIZADA_QUEUE = "cirurgia.atualizada.queue";
+    public static final String CIRURGIA_CANCELADA_QUEUE = "cirurgia.cancelada.queue";
+    
+    public static final String CIRURGIA_CRIADA_ROUTING_KEY = "cirurgia.criada";
+    public static final String CIRURGIA_ATUALIZADA_ROUTING_KEY = "cirurgia.atualizada";
+    public static final String CIRURGIA_CANCELADA_ROUTING_KEY = "cirurgia.cancelada";
 
     @Bean
     public TopicExchange exchange() {
@@ -22,15 +28,39 @@ public class RabbitMQConfig {
     }
 
     @Bean
-    public Queue cirurgiaQueue() {
-        return new Queue(CIRURGIA_AGENDADA_QUEUE, true);
+    public Queue cirurgiaCriadaQueue() {
+        return new Queue(CIRURGIA_CRIADA_QUEUE, true);
     }
 
     @Bean
-    public Binding binding() {
-        return BindingBuilder.bind(cirurgiaQueue())
+    public Binding cirurgiaCriadaBinding() {
+        return BindingBuilder.bind(cirurgiaCriadaQueue())
                 .to(exchange())
-                .with(CIRURGIA_AGENDADA_ROUTING_KEY);
+                .with(CIRURGIA_CRIADA_ROUTING_KEY);
+    }
+
+    @Bean
+    public Queue cirurgiaAtualizadaQueue() {
+        return new Queue(CIRURGIA_ATUALIZADA_QUEUE, true);
+    }
+
+    @Bean
+    public Binding cirurgiaAtualizadaBinding() {
+        return BindingBuilder.bind(cirurgiaAtualizadaQueue())
+                .to(exchange())
+                .with(CIRURGIA_ATUALIZADA_ROUTING_KEY);
+    }
+
+    @Bean
+    public Queue cirurgiaCanceladaQueue() {
+        return new Queue(CIRURGIA_CANCELADA_QUEUE, true);
+    }
+
+    @Bean
+    public Binding cirurgiaCanceladaBinding() {
+        return BindingBuilder.bind(cirurgiaCanceladaQueue())
+                .to(exchange())
+                .with(CIRURGIA_CANCELADA_ROUTING_KEY);
     }
 
     @Bean
