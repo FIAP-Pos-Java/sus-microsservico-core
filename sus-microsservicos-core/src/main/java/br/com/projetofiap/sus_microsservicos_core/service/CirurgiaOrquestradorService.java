@@ -4,7 +4,6 @@ import br.com.projetofiap.sus_microsservicos_core.config.RabbitMQConfig;
 import br.com.projetofiap.sus_microsservicos_core.controller.dto.CirurgiaDTO;
 import br.com.projetofiap.sus_microsservicos_core.event.CirurgiaAgendadaEvent;
 import br.com.projetofiap.sus_microsservicos_core.exceptions.UsuarioInexistenteException;
-import br.com.projetofiap.sus_microsservicos_core.model.enums.StatusCirurgia;
 import br.com.projetofiap.sus_microsservicos_core.repository.MedicoRepository;
 import br.com.projetofiap.sus_microsservicos_core.repository.PacienteRepository;
 import lombok.RequiredArgsConstructor;
@@ -27,14 +26,13 @@ public class CirurgiaOrquestradorService {
     public void agendarCirurgia(CirurgiaDTO dto) {
         validarUsuarios(dto.pacienteId(), dto.medicoId());
         
-        CirurgiaAgendadaEvent evento = new CirurgiaAgendadaEvent(
+        CirurgiaAgendadaEvent evento = CirurgiaAgendadaEvent.criar(
                 dto.pacienteId(),
                 dto.medicoId(),
                 dto.dataCirurgia(),
                 dto.horaCirurgia(),
                 dto.local(),
-                dto.descricao(),
-                StatusCirurgia.AGENDADA
+                dto.descricao()
         );
         
         publicarEvento(evento);
@@ -44,14 +42,14 @@ public class CirurgiaOrquestradorService {
     public void atualizarCirurgia(UUID cirurgiaId, CirurgiaDTO dto) {
         validarUsuarios(dto.pacienteId(), dto.medicoId());
         
-        CirurgiaAgendadaEvent evento = new CirurgiaAgendadaEvent(
+        CirurgiaAgendadaEvent evento = CirurgiaAgendadaEvent.atualizar(
+                cirurgiaId,
                 dto.pacienteId(),
                 dto.medicoId(),
                 dto.dataCirurgia(),
                 dto.horaCirurgia(),
                 dto.local(),
-                dto.descricao(),
-                StatusCirurgia.AGENDADA
+                dto.descricao()
         );
         
         publicarEvento(evento);
@@ -59,10 +57,7 @@ public class CirurgiaOrquestradorService {
     }
 
     public void cancelarCirurgia(UUID cirurgiaId) {
-        CirurgiaAgendadaEvent evento = new CirurgiaAgendadaEvent(
-                null, null, null, null, null, null,
-                StatusCirurgia.CANCELADA
-        );
+        CirurgiaAgendadaEvent evento = CirurgiaAgendadaEvent.cancelar(cirurgiaId);
         
         publicarEvento(evento);
         logger.info("Comando DELETE publicado para cirurgia {}", cirurgiaId);

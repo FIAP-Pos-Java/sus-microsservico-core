@@ -20,7 +20,6 @@ public class CirurgiaController {
     private final Logger logger = LoggerFactory.getLogger(CirurgiaController.class);
     private final CirurgiaOrquestradorService orquestradorService;
 
-    // COMANDO: Criar cirurgia (via RabbitMQ)
     @PostMapping
     public ResponseEntity<Void> agendarCirurgia(@Valid @RequestBody CirurgiaDTO dto) {
         logger.info("POST -> /api/v1/cirurgias");
@@ -28,7 +27,6 @@ public class CirurgiaController {
         return ResponseEntity.status(HttpStatus.ACCEPTED).build();
     }
 
-    // COMANDO: Atualizar cirurgia (via RabbitMQ)
     @PutMapping("{id}")
     public ResponseEntity<Void> atualizarCirurgia(@PathVariable String id, @Valid @RequestBody CirurgiaDTO dto) {
         logger.info("PUT -> /api/v1/cirurgias/{}", id);
@@ -37,7 +35,6 @@ public class CirurgiaController {
         return ResponseEntity.status(HttpStatus.ACCEPTED).build();
     }
 
-    // COMANDO: Cancelar cirurgia (via RabbitMQ)
     @DeleteMapping("{id}")
     public ResponseEntity<Void> cancelarCirurgia(@PathVariable String id) {
         logger.info("DELETE -> /api/v1/cirurgias/{}", id);
