@@ -1,4 +1,4 @@
-# SUS - Microserviço do Core do SusTech
+# SUS - Microsserviço do Core do SusTech
 
 ## Configuração
 
